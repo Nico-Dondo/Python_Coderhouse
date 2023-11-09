@@ -3,11 +3,8 @@ import json
 ARCHIVO_BASE_DATOS = 'clientes.json'
 
 class Cliente:
-    def __init__(self, nombre, contrasena, direccion, correo):
-        self.nombre = nombre
-        self.contrasena = contrasena
-        self.direccion = direccion
-        self.correo = correo
+    def __init__(self, nombre, contraseña, direccion, correo):
+        self.nombre, self.contraseña, self.direccion, self.correo = nombre, contraseña, direccion, correo
 
     def __str__(self):
         return f"Cliente: {self.nombre}\nDirección: {self.direccion}\nCorreo: {self.correo}"
@@ -19,39 +16,30 @@ class ManejadorClientes:
     def cargar_base_datos(self):
         try:
             with open(ARCHIVO_BASE_DATOS, 'r') as archivo:
-                datos = json.load(archivo)
-                return {nombre: Cliente(nombre, contrasena, direccion, correo) for nombre, (contrasena, direccion, correo) in datos.items()}
+                return {nombre: Cliente(nombre, contraseña, direccion, correo) for nombre, (contraseña, direccion, correo) in json.load(archivo).items()}
         except FileNotFoundError:
             return {}
 
     def guardar_base_datos(self):
         with open(ARCHIVO_BASE_DATOS, 'w') as archivo:
-            datos = {cliente.nombre: (cliente.contrasena, cliente.direccion, cliente.correo) for cliente in self.base_de_datos.values()}
-            json.dump(datos, archivo, indent=2)
+            json.dump({nombre: (cliente.contraseña, cliente.direccion, cliente.correo) for nombre, cliente in self.base_de_datos.items()}, archivo, indent=2)
 
     def validar_correo(self, correo):
         return '@' in correo
 
     def registrar_cliente(self):
-        nombre_cliente = input("Ingrese nombre de cliente: ")
-
-        if nombre_cliente in self.base_de_datos:
-            print("El cliente ya existe. Por favor, elija otro nombre de cliente.")
-        else:
-            contrasena = input("Ingrese contraseña: ")
-            direccion = input("Ingrese dirección: ")
-            
+        nombre = input("Ingrese nombre de cliente: ")
+        contraseña = input("Ingrese contraseña: ")
+        direccion = input("Ingrese dirección: ")
         
-            correo_valido = False
-            while not correo_valido:
-                correo = input("Ingrese correo electrónico: ")
-                correo_valido = self.validar_correo(correo)
-                if not correo_valido:
-                    print("La dirección de correo no es válida. Debe contener '@'.")
+        while True:
+            correo = input("Ingrese correo electrónico: ")
+            if self.validar_correo(correo):
+                break
+            print("La dirección de correo no es válida. Debe contener '@'.")
             
-            nuevo_cliente = Cliente(nombre_cliente, contrasena, direccion, correo)
-            self.base_de_datos[nombre_cliente] = nuevo_cliente
-            print(f"Cliente '{nombre_cliente}' registrado exitosamente.")
+        self.base_de_datos[nombre] = Cliente(nombre, contraseña, direccion, correo)
+        print(f"Cliente '{nombre}' registrado exitosamente.")
 
     def mostrar_clientes(self):
         print("\nClientes registrados:")
@@ -81,3 +69,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
